@@ -1,0 +1,78 @@
+# Import libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+
+
+# Linear Regression from Scratch
+class LinearRegressionScratch:
+    def __init__(self, learning_rate=0.1, n_iterations=1000):
+        self.lr = learning_rate
+        self.n_iterations = n_iterations
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
+
+        # Initialize weights and bias
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+
+        # Gradient Descent
+        for _ in range(self.n_iterations):
+            y_pred = np.dot(X, self.weights) + self.bias
+
+            # Compute gradients
+            dw = (1 / n_samples) * np.dot(X.T, (y_pred - y))
+            db = (1 / n_samples) * np.sum(y_pred - y)
+
+            # Update parameters
+            self.weights -= self.lr * dw
+            self.bias -= self.lr * db
+
+    def predict(self, X):
+        return np.dot(X, self.weights) + self.bias
+
+
+# Load dataset
+diabetes = load_diabetes()
+X = diabetes.data
+y = diabetes.target
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
+model = LinearRegressionScratch(learning_rate=0.1, n_iterations=1000)
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+
+# Evaluation metrics
+mse = np.mean((y_test - y_pred) ** 2)
+r2 = 1 - (np.sum((y_test - y_pred) ** 2) / np.sum((y_test - np.mean(y_test)) ** 2))
+
+print("Mean Squared Error:", mse)
+print("R2 Score:", r2)
+
+
+# Plot Actual vs Predicted
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, y_pred, color='blue', alpha=0.7)
+
+# Perfect prediction line
+plt.plot([y_test.min(), y_test.max()],
+         [y_test.min(), y_test.max()],
+         color='red', linewidth=2)
+
+plt.xlabel("Actual Values")
+plt.ylabel("Predicted Values")
+plt.title("Linear Regression from Scratch (Diabetes Dataset)")
+plt.grid(True)
+plt.show()
